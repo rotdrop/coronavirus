@@ -15,26 +15,43 @@ class JohnsHopkinsCase:
     country: str
     confirmed: int
     deaths: int
-    recovered: int
+    _recovered: int
+    _current: int
     latitude: float
     longitude: float
     updated: int
 
     @property
     def current(self):
-        if None in (self.confirmed, self.deaths, self.recovered):
+        if not self._current is None:
+#            logging.getLogger(__name__).warning("Return own current: %s", self._current)
+            return self._current
+        if None in (self.confirmed, self.deaths, self._recovered):
             return None
-        return self.confirmed - self.deaths - self.recovered
+#        logging.getLogger(__name__).warning("Return computed current: %s", self.confirmed - self.deaths - self._recovered)
+        return self.confirmed - self.deaths - self._recovered
+
+    @property
+    def recovered(self):
+        if not self._recovered is None:
+#            logging.getLogger(__name__).warning("Return own recovered: %s", self._recovered)
+            return self._recovered
+        if None in (self.confirmed, self.deaths, self._current):
+            return None
+#        logging.getLogger(__name__).warning("Return computed recovered: %s", self.confirmed - self.deaths - self._current)
+        return self.confirmed - self.deaths - self._current
 
     @staticmethod
     def from_json(item):
         attrs = item["attributes"]
+#        logging.getLogger(__name__).warning("Attributes: %s", attrs)
         return JohnsHopkinsCase(
             id=attrs["OBJECTID"],
             country=attrs["Country_Region"],
             confirmed=attrs["Confirmed"],
             deaths=attrs["Deaths"],
-            recovered=attrs["Recovered"],
+            _recovered=attrs["Recovered"],
+            _current=attrs["Active"],
             latitude=attrs["Lat"],
             longitude=attrs["Long_"],
             updated=attrs["Last_Update"],
